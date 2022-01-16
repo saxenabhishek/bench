@@ -7,3 +7,4 @@ requests
 semantic-version~=2.8.2
 setuptools
 virtualenv
+toml

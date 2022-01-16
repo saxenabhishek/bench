@@ -253,6 +253,21 @@ def remove_from_excluded_apps_txt(app, bench_path="."):
 		apps.remove(app)
 		return write_excluded_apps_txt(apps, bench_path=bench_path)
 
+def resolve_dependencies(git_url: str, bench: "Bench", branch: str = None):
+	from bench.utils.app import get_required_deps_url
+	import toml
+
+	resolution = {}
+	required_url = get_required_deps_url(git_url, branch)
+	dependencies = bench.run(f"curl -L {required_url}", cwd=False)
+	try:
+		toml_file = toml.loads(dependencies)
+	except Exception:
+		click.echo("\nNo toml file found \n", err=True)
+
+	# Todo: read deps from file
+
+	return resolution
 
 def setup_app_dependencies(
 	repo_name, bench_path=".", branch=None, skip_assets=False, verbose=False
@@ -310,6 +325,7 @@ def get_app(
 	repo_name = app.repo
 	branch = app.tag
 	bench_setup = False
+	resolved_deps = resolve_dependencies(git_url, bench, branch)
 
 	if not is_bench_directory(bench_path):
 		if not init_bench:
