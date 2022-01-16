@@ -12,6 +12,7 @@ from datetime import date
 
 # imports - third party imports
 import click
+import requests
 
 # imports - module imports
 import bench
@@ -253,15 +254,14 @@ def remove_from_excluded_apps_txt(app, bench_path="."):
 		apps.remove(app)
 		return write_excluded_apps_txt(apps, bench_path=bench_path)
 
-def resolve_dependencies(git_url: str, bench: "Bench", branch: str = None):
+def resolve_dependencies(git_url: str, branch: str = None):
 	from bench.utils.app import get_required_deps_url
 	import toml
 
 	resolution = {}
 	required_url = get_required_deps_url(git_url, branch)
-	dependencies = bench.run(f"curl -L {required_url}", cwd=False)
 	try:
-		toml_file = toml.loads(dependencies)
+		requirements_file = toml.loads(requests.get(required_url).text)
 	except Exception:
 		click.echo("\nNo toml file found \n", err=True)
 
@@ -325,7 +325,7 @@ def get_app(
 	repo_name = app.repo
 	branch = app.tag
 	bench_setup = False
-	resolved_deps = resolve_dependencies(git_url, bench, branch)
+	resolved_deps = resolve_dependencies(git_url, branch)
 
 	if not is_bench_directory(bench_path):
 		if not init_bench:
