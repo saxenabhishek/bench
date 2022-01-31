@@ -14,10 +14,13 @@ from bench.utils import paths_in_bench, exec_cmd
 from bench.utils.system import init
 from bench.bench import Bench
 
-if sys.version_info.major == 2:
+PYTHON_VER = sys.version_info
+
+FRAPPE_BRANCH = "develop"
+if PYTHON_VER.major == 2:
 	FRAPPE_BRANCH = "version-12"
-else:
-	FRAPPE_BRANCH = "develop"
+elif PYTHON_VER.minor < 8:
+	FRAPPE_BRANCH = "version-13"
 
 class TestBenchBase(unittest.TestCase):
 	def setUp(self):
